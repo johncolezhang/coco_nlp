@@ -17,20 +17,26 @@ class ESConnector:
         else:
             raise Exception("es host type should be list or str")
 
-        self.es_conn = Elasticsearch(
+        if es_username and es_password:
+            http_auth = (es_username, es_password)
+        else:
+            http_auth = None
+
+        self.es = Elasticsearch(
             hosts=hosts,
             port=es_port,
-            http_auth=(es_username, es_password)
+            http_auth=http_auth
         )
 
-    def get_sample(self):
+    def get_sample(self, index, query_phrase):
         return
 
-    def get_random_sample(self):
+    def get_random_sample(self, index, size):
         return
 
-    def get_index_size(self):
-        return
+    def get_index_size(self, index):
+        resp = self.es.indices.stats(index=index)
+        return resp["_all"]["primaries"]["docs"]["count"]
 
 
 class ESGenerator:
@@ -60,3 +66,8 @@ class ESGenerator:
     def sample(self):
         # TODO: add sampling function
         yield "", ""
+
+
+if __name__ == "__main__":
+    es_conn = ESConnector(es_host="10.6.55.103", es_port=9200)
+    print(es_conn.get_index_size(index="news"))
